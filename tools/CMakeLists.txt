@@ -13,3 +13,9 @@ add_library(tools OBJECT
     pid.cpp
     crc.cpp
 )
+
+target_link_libraries(tools PUBLIC fmt::fmt spdlog::spdlog)
+target_include_directories(tools BEFORE PRIVATE
+    $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
+)

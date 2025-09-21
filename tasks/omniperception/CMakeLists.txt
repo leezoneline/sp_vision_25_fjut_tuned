@@ -8,4 +8,8 @@ add_library(omniperception OBJECT
     decider.cpp
     perceptron.cpp
 )
-target_link_libraries(omniperception openvino::runtime)
+target_link_libraries(omniperception openvino::runtime spdlog::spdlog fmt::fmt)
+target_include_directories(omniperception BEFORE PRIVATE
+    $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
+)

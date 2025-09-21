@@ -35,7 +35,12 @@ else()
   message(FATAL_ERROR "Unsupported architecture: ${CMAKE_HOST_SYSTEM_PROCESSOR}!")
 endif()
 
-target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp serial)
+target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+
+target_include_directories(io BEFORE PRIVATE
+  $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
+  $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
 ################## 检查 ROS 环境 ##################
 find_package(ament_cmake QUIET)

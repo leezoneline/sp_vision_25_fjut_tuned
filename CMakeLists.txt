@@ -7,9 +7,31 @@ set(CMAKE_BUILD_TYPE Release)
 message(STATUS "--------------------CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}--------------------")
 
 find_package(OpenCV REQUIRED)
-find_package(fmt REQUIRED)
+find_package(fmt 11 QUIET)
+if(NOT fmt_FOUND)
+    include(FetchContent)
+    message(STATUS "fmt>=11 not found system-wide; fetching fmt from upstream")
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 11.0.2
+    )
+    FetchContent_MakeAvailable(fmt)
+endif()
 find_package(Eigen3 REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(spdlog 1.13 QUIET)
+if(NOT spdlog_FOUND)
+    include(FetchContent)
+    message(STATUS "Using bundled spdlog (>=1.13) due to missing/old system spdlog")
+    set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG v1.13.0
+    )
+    FetchContent_MakeAvailable(spdlog)
+endif()
+add_compile_definitions(SPDLOG_FMT_EXTERNAL=1)
 find_package(yaml-cpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 set(OpenVINO_DIR "/opt/intel/openvino_2024.6.0/runtime/cmake/")
