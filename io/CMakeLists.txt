@@ -9,6 +9,7 @@ add_library(io STATIC
     hikrobot/hikrobot.cpp    
     mindvision/mindvision.cpp  
     usbcamera/usbcamera.cpp  
+  daheng/daheng.cpp
     camera.cpp
     cboard.cpp
     dm_imu/dm_imu.cpp
@@ -35,7 +36,15 @@ else()
   message(FATAL_ERROR "Unsupported architecture: ${CMAKE_HOST_SYSTEM_PROCESSOR}!")
 endif()
 
-target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+# daheng
+target_include_directories(io PUBLIC daheng/include)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  target_link_directories(io PUBLIC daheng/lib/x86_64)
+else()
+  message(WARNING "Daheng SDK libs only provided for x86_64 in repo.")
+endif()
+
+target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
 
 target_include_directories(io BEFORE PRIVATE
   $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
