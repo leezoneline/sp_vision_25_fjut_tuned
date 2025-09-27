@@ -20,6 +20,7 @@ namespace io
 class Daheng : public CameraBase
 {
 public:
+	// 简化构造：仅设定曝光、增益与可选 USB vid:pid（用于掉线时 reset）
 	Daheng(double exposure_ms, double gain, const std::string & vid_pid);
 	~Daheng() override;
 	void read(cv::Mat & img, std::chrono::steady_clock::time_point & timestamp) override;

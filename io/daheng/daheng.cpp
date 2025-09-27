@@ -134,11 +134,13 @@ void Daheng::open()
           case GX_PIXEL_FORMAT_BAYER_BG8: code = cv::COLOR_BayerBG2BGR; break;
         }
         cv::cvtColor(raw, img, code);
+        // 统一再交换一次 R/B，修正实际观测到的红蓝颠倒
+        cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
       } else {
-        // 未支持的像素格式（如10/12bit），建议在相机端改为 8bit Bayer 或 RGB8/BGR8
         tools::logger()->warn("Unsupported pixel format: {}. Please set camera to 8-bit Bayer or RGB8/BGR8.", pix);
         img = cv::Mat();
       }
+
 
       queue_.push({img, timestamp});
 
@@ -206,5 +208,7 @@ void Daheng::reset_usb() const
     tools::logger()->info("Reset usb successfully :)");
   libusb_close(handle);
 }
+
+
 
 }  // namespace io
