@@ -125,6 +125,7 @@ void Daheng::open()
         cv::Mat rgb(h, w, CV_8UC3, pframe->pImgBuf);
         cv::cvtColor(rgb, img, cv::COLOR_RGB2BGR);
       } else if (pix == GX_PIXEL_FORMAT_BAYER_RG8 || pix == GX_PIXEL_FORMAT_BAYER_GR8 || pix == GX_PIXEL_FORMAT_BAYER_GB8 || pix == GX_PIXEL_FORMAT_BAYER_BG8) {
+        // Bayer 去马赛克 -> 直接得到 BGR
         cv::Mat raw(h, w, CV_8UC1, pframe->pImgBuf);
         int code = cv::COLOR_BayerRG2BGR;
         switch (pix) {
@@ -133,9 +134,7 @@ void Daheng::open()
           case GX_PIXEL_FORMAT_BAYER_GB8: code = cv::COLOR_BayerGB2BGR; break;
           case GX_PIXEL_FORMAT_BAYER_BG8: code = cv::COLOR_BayerBG2BGR; break;
         }
-        cv::cvtColor(raw, img, code);
-        // 统一再交换一次 R/B，修正实际观测到的红蓝颠倒
-        cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+        cv::cvtColor(raw, img, code); // 得到真正 BGR
       } else {
         tools::logger()->warn("Unsupported pixel format: {}. Please set camera to 8-bit Bayer or RGB8/BGR8.", pix);
         img = cv::Mat();
