@@ -59,8 +59,6 @@ target_include_directories(io BEFORE PRIVATE
   $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
   $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
 )
-  $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
-)
 
 ################## 检查 ROS 环境 ##################
 find_package(ament_cmake QUIET)
