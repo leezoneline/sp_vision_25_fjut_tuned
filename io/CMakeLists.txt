@@ -47,22 +47,18 @@ endif()
 
 target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
 
-# 设置 RPATH，使可执行文件能找到相对路径下的动态库
-# BUILD_RPATH: 用于构建目录中的可执行文件
-# INSTALL_RPATH: 用于安装后的可执行文件
-set_target_properties(io PROPERTIES
-    BUILD_RPATH_USE_ORIGIN TRUE
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    BUILD_RPATH "${CMAKE_CURRENT_SOURCE_DIR}/hikrobot/lib/${HIKROBOT_LIB_ARCH}:${CMAKE_CURRENT_SOURCE_DIR}/mindvision/lib/${MINDVISION_LIB_ARCH}:${CMAKE_CURRENT_SOURCE_DIR}/daheng/lib/${DAHENG_LIB_ARCH}"
-)
-
-# 为链接此库的可执行文件设置 RPATH
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# 设置相对RPATH，使用$ORIGIN相对路径
+# $ORIGIN表示可执行文件所在目录
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/amd64:$ORIGIN/../io/mindvision/lib/amd64:$ORIGIN/../io/daheng/lib/x86_64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/arm64:$ORIGIN/../io/mindvision/lib/arm64")
+endif()
 
 target_include_directories(io BEFORE PRIVATE
   $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
+  $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
+)
   $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
