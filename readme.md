@@ -47,7 +47,7 @@ https://github.com/user-attachments/assets/606c2907-2f11-4392-b3fe-7ee4b7b6fd29
 ### 3.1 项目环境
 操作系统：Ubuntu 22.04\
 运算平台：NUC12WSKI7（i7-1260P，16GB）\
-相机型号：海康MV-CS016-10UC\
+相机型号：海康MV-CS016-10UC、大恒MER-131-210U3C\
 镜头型号：海康官方6mm镜头\
 下位机型号：RoboMaster开发板C型（STM32F407）\
 IMU型号：使用C板内置BMI088作为IMU\
@@ -56,7 +56,7 @@ IMU型号：使用C板内置BMI088作为IMU\
 
 ### 3.2 编译方式
 1. 安装依赖项：
-   - [MindVision SDK](https://mindvision.com.cn/category/software/sdk-installation-package/)或[HikRobot SDK](https://www.hikrobotics.com/cn2/source/support/software/MVS_STD_GML_V2.1.2_231116.zip)
+   - [MindVision SDK](https://mindvision.com.cn/category/software/sdk-installation-package/)或[HikRobot SDK](https://www.hikrobotics.com/cn2/source/support/software/MVS_STD_GML_V2.1.2_231116.zip)或[DaHeng SDK](https://gb.daheng-imaging.com/CN/Software/Cameras/Linux/Galaxy_Linux-x86_Gige-U3_32bits-64bits_2.4.2507.9231.zip)
    - [OpenVINO](https://docs.openvino.ai/2024/get-started/install-openvino/install-openvino-archive-linux.html)
    - [Ceres](http://ceres-solver.org/installation.html)
    - 其余：
