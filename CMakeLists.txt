@@ -41,6 +41,31 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
 
+# 设置 RPATH，使可执行文件能够找到项目内的动态库
+# 这样就不需要在部署时单独安装SDK了
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# 根据架构设置库路径
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  set(CAMERA_SDK_RPATH 
+      "${PROJECT_SOURCE_DIR}/io/hikrobot/lib/amd64"
+      "${PROJECT_SOURCE_DIR}/io/mindvision/lib/amd64"
+      "${PROJECT_SOURCE_DIR}/io/daheng/lib/x86_64"
+  )
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(CAMERA_SDK_RPATH 
+      "${PROJECT_SOURCE_DIR}/io/hikrobot/lib/arm64"
+      "${PROJECT_SOURCE_DIR}/io/mindvision/lib/arm64"
+  )
+else()
+  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}!")
+endif()
+
+# 将相机SDK库路径添加到 CMAKE_BUILD_RPATH
+list(APPEND CMAKE_BUILD_RPATH ${CAMERA_SDK_RPATH})
+set(CMAKE_INSTALL_RPATH "${CAMERA_SDK_RPATH}")
 
 add_subdirectory(tools)
 add_subdirectory(io)

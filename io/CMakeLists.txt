@@ -16,35 +16,50 @@ add_library(io STATIC
     gimbal/gimbal.cpp
 )
 
+# 根据架构设置库路径后缀
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  set(HIKROBOT_LIB_ARCH "amd64")
+  set(MINDVISION_LIB_ARCH "amd64")
+  set(DAHENG_LIB_ARCH "x86_64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(HIKROBOT_LIB_ARCH "arm64")
+  set(MINDVISION_LIB_ARCH "arm64")
+  set(DAHENG_LIB_ARCH "arm64")  # 注意：Daheng可能没有arm64库
+else()
+  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}!")
+endif()
+
 # hikrobot
 target_include_directories(io PUBLIC hikrobot/include)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-  target_link_directories(io PUBLIC hikrobot/lib/amd64)
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-  target_link_directories(io PUBLIC hikrobot/lib/arm64)
-else()
-  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_HOST_SYSTEM_PROCESSOR}!")
-endif()
+target_link_directories(io PUBLIC hikrobot/lib/${HIKROBOT_LIB_ARCH})
 
 # mindvision
 target_include_directories(io PUBLIC mindvision/include)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-  target_link_directories(io PUBLIC mindvision/lib/amd64)
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-  target_link_directories(io PUBLIC mindvision/lib/arm64)
-else()
-  message(FATAL_ERROR "Unsupported architecture: ${CMAKE_HOST_SYSTEM_PROCESSOR}!")
-endif()
+target_link_directories(io PUBLIC mindvision/lib/${MINDVISION_LIB_ARCH})
 
 # daheng
 target_include_directories(io PUBLIC daheng/include)
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-  target_link_directories(io PUBLIC daheng/lib/x86_64)
+  target_link_directories(io PUBLIC daheng/lib/${DAHENG_LIB_ARCH})
 else()
   message(WARNING "Daheng SDK libs only provided for x86_64 in repo.")
 endif()
 
 target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+
+# 设置 RPATH，使可执行文件能找到相对路径下的动态库
+# BUILD_RPATH: 用于构建目录中的可执行文件
+# INSTALL_RPATH: 用于安装后的可执行文件
+set_target_properties(io PROPERTIES
+    BUILD_RPATH_USE_ORIGIN TRUE
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    BUILD_RPATH "${CMAKE_CURRENT_SOURCE_DIR}/hikrobot/lib/${HIKROBOT_LIB_ARCH}:${CMAKE_CURRENT_SOURCE_DIR}/mindvision/lib/${MINDVISION_LIB_ARCH}:${CMAKE_CURRENT_SOURCE_DIR}/daheng/lib/${DAHENG_LIB_ARCH}"
+)
+
+# 为链接此库的可执行文件设置 RPATH
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 target_include_directories(io BEFORE PRIVATE
   $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
