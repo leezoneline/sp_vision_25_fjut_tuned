@@ -24,7 +24,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
   set(HIKROBOT_LIB_ARCH "arm64")
   set(MINDVISION_LIB_ARCH "arm64")
-  set(DAHENG_LIB_ARCH "arm64")  # 注意：Daheng可能没有arm64库
+  set(DAHENG_LIB_ARCH "armv8")  # ARM64架构使用armv8库
 else()
   message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}!")
 endif()
@@ -39,11 +39,7 @@ target_link_directories(io PUBLIC mindvision/lib/${MINDVISION_LIB_ARCH})
 
 # daheng
 target_include_directories(io PUBLIC daheng/include)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-  target_link_directories(io PUBLIC daheng/lib/${DAHENG_LIB_ARCH})
-else()
-  message(WARNING "Daheng SDK libs only provided for x86_64 in repo.")
-endif()
+target_link_directories(io PUBLIC daheng/lib/${DAHENG_LIB_ARCH})
 
 target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
 
@@ -52,7 +48,7 @@ target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
   set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/amd64:$ORIGIN/../io/mindvision/lib/amd64:$ORIGIN/../io/daheng/lib/x86_64")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-  set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/arm64:$ORIGIN/../io/mindvision/lib/arm64")
+  set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/arm64:$ORIGIN/../io/mindvision/lib/arm64:$ORIGIN/../io/daheng/lib/armv8")
 endif()
 
 target_include_directories(io BEFORE PRIVATE
