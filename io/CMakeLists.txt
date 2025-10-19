@@ -41,7 +41,23 @@ target_link_directories(io PUBLIC mindvision/lib/${MINDVISION_LIB_ARCH})
 target_include_directories(io PUBLIC daheng/include)
 target_link_directories(io PUBLIC daheng/lib/${DAHENG_LIB_ARCH})
 
-target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+# 根据架构选择不同的库链接方式
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  # ARM64下明确指定大恒库的完整路径
+  target_link_libraries(io 
+    MvCameraControl 
+    MVSDK 
+    ${CMAKE_CURRENT_SOURCE_DIR}/daheng/lib/${DAHENG_LIB_ARCH}/libgxiapi.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/daheng/lib/${DAHENG_LIB_ARCH}/liblog4cplus_gx.so
+    usb-1.0 
+    yaml-cpp 
+    serial 
+    spdlog::spdlog 
+    fmt::fmt
+  )
+endif()
 
 # 设置相对RPATH，使用$ORIGIN相对路径
 # $ORIGIN表示可执行文件所在目录
