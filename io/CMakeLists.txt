@@ -51,6 +51,13 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
   set(CAMERA_SDK_RPATH "$ORIGIN/../io/hikrobot/lib/arm64:$ORIGIN/../io/mindvision/lib/arm64:$ORIGIN/../io/daheng/lib/armv8")
 endif()
 
+# 设置RPATH，确保运行时能找到所有相机SDK的依赖库
+set_target_properties(io PROPERTIES
+  BUILD_RPATH "${CMAKE_CURRENT_SOURCE_DIR}/daheng/lib/${DAHENG_LIB_ARCH};${CMAKE_CURRENT_SOURCE_DIR}/hikrobot/lib/${HIKROBOT_LIB_ARCH};${CMAKE_CURRENT_SOURCE_DIR}/mindvision/lib/${MINDVISION_LIB_ARCH}"
+  INSTALL_RPATH "${CAMERA_SDK_RPATH}"
+  INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
 target_include_directories(io BEFORE PRIVATE
   $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
   $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>
