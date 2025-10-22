@@ -2,13 +2,14 @@
 #define AUTO_AIM__YOLO11_HPP
 
 #include <list>
+#include <memory>
 #include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
 #include <string>
 #include <vector>
 
 #include "tasks/auto_aim/armor.hpp"
 #include "tasks/auto_aim/detector.hpp"
+#include "tasks/auto_aim/trt_infer.hpp"
 #include "tasks/auto_aim/yolo.hpp"
 
 namespace auto_aim
@@ -33,8 +34,7 @@ private:
   const float score_threshold_ = 0.7;
   double min_confidence_, binary_threshold_;
 
-  ov::Core core_;
-  ov::CompiledModel compiled_model_;
+  std::unique_ptr<TrtInfer> trt_infer_;
 
   cv::Rect roi_;
   cv::Point2f offset_;

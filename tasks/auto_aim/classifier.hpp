@@ -1,11 +1,12 @@
 #ifndef AUTO_AIM__CLASSIFIER_HPP
 #define AUTO_AIM__CLASSIFIER_HPP
 
+#include <memory>
 #include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
 #include <string>
 
 #include "armor.hpp"
+#include "trt_infer.hpp"
 
 namespace auto_aim
 {
@@ -20,8 +21,7 @@ public:
 
 private:
   cv::dnn::Net net_;
-  ov::Core core_;
-  ov::CompiledModel compiled_model_;
+  std::unique_ptr<TrtInfer> trt_infer_;
 };
 
 }  // namespace auto_aim

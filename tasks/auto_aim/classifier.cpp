@@ -9,9 +9,7 @@ Classifier::Classifier(const std::string & config_path)
   auto yaml = YAML::LoadFile(config_path);
   auto model = yaml["classify_model"].as<std::string>();
   net_ = cv::dnn::readNetFromONNX(model);
-  auto ovmodel = core_.read_model(model);
-  compiled_model_ = core_.compile_model(
-    ovmodel, "AUTO", ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
+  trt_infer_ = std::make_unique<TrtInfer>(model);
 }
 
 void Classifier::classify(Armor & armor)
@@ -83,18 +81,12 @@ void Classifier::ovclassify(Armor & armor)
 
   auto roi = cv::Rect(0, 0, w, h);
   cv::resize(gray, input(roi), {w, h});
-  // Normalize the input image to [0, 1] range
-  input.convertTo(input, CV_32F, 1.0 / 255.0);
+  
+  // Convert to BGR for TensorRT (expects 3 channels)
+  cv::Mat input_bgr;
+  cv::cvtColor(input, input_bgr, cv::COLOR_GRAY2BGR);
 
-  ov::Tensor input_tensor(ov::element::f32, {1, 1, 32, 32}, input.data);
-
-  ov::InferRequest infer_request = compiled_model_.create_infer_request();
-  infer_request.set_input_tensor(input_tensor);
-  infer_request.infer();
-
-  auto output_tensor = infer_request.get_output_tensor();
-  auto output_shape = output_tensor.get_shape();
-  cv::Mat outputs(1, 9, CV_32F, output_tensor.data());
+  cv::Mat outputs = trt_infer_->infer(input_bgr);
 
   // Softmax
   float max = *std::max_element(outputs.begin<float>(), outputs.end<float>());
