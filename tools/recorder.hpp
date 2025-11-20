@@ -1,6 +1,7 @@
 #ifndef TOOLS__RECORDER_HPP
 #define TOOLS__RECORDER_HPP
 
+#include <atomic>
 #include <Eigen/Geometry>
 #include <chrono>
 #include <fstream>

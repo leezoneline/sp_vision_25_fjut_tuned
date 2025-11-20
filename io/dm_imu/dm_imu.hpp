@@ -4,6 +4,7 @@
 #include <math.h>
 #include <serial/serial.h>
 
+#include <atomic>
 #include <Eigen/Geometry>
 #include <array>
 #include <fstream>

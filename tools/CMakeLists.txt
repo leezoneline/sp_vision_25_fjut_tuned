@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+find_package(Eigen3 REQUIRED)
+
 add_library(tools OBJECT 
     exiter.cpp
     extended_kalman_filter.cpp
@@ -14,7 +16,7 @@ add_library(tools OBJECT
     crc.cpp
 )
 
-target_link_libraries(tools PUBLIC fmt::fmt spdlog::spdlog)
+target_link_libraries(tools PUBLIC fmt::fmt spdlog::spdlog Eigen3::Eigen)
 target_include_directories(tools BEFORE PRIVATE
     $<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:spdlog::spdlog,INTERFACE_INCLUDE_DIRECTORIES>

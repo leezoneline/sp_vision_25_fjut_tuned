@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
+find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 add_subdirectory(serial)
@@ -41,7 +42,7 @@ target_link_directories(io PUBLIC mindvision/lib/${MINDVISION_LIB_ARCH})
 target_include_directories(io PUBLIC daheng/include)
 target_link_directories(io PUBLIC daheng/lib/${DAHENG_LIB_ARCH})
 
-target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt)
+target_link_libraries(io MvCameraControl MVSDK gxiapi log4cplus_gx usb-1.0 yaml-cpp serial spdlog::spdlog fmt::fmt Eigen3::Eigen)
 
 # 设置相对RPATH，使用$ORIGIN相对路径
 # $ORIGIN表示可执行文件所在目录
