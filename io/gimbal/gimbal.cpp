@@ -4,6 +4,8 @@
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 #include "tools/yaml.hpp"
+#include <sstream>
+#include <iomanip>
 
 namespace io
 {
@@ -14,7 +16,16 @@ Gimbal::Gimbal(const std::string & config_path)
 
   try {
     serial_.setPort(com_port);
+    serial_.setBaudrate(921600);
+    serial_.setFlowcontrol(serial::flowcontrol_none);
+    serial_.setParity(serial::parity_none);
+    serial_.setStopbits(serial::stopbits_one);
+    serial_.setBytesize(serial::eightbits);
+    serial::Timeout time_out = serial::Timeout::simpleTimeout(20);
+    serial_.setTimeout(time_out);
     serial_.open();
+    
+    tools::logger()->info("[Gimbal] Serial port opened: port={}, baudrate=921600", com_port);
   } catch (const std::exception & e) {
     tools::logger()->error("[Gimbal] Failed to open serial: {}", e.what());
     exit(1);
@@ -131,37 +142,81 @@ void Gimbal::read_thread()
 {
   tools::logger()->info("[Gimbal] read_thread started.");
   int error_count = 0;
+  bool frame_synced = false;  // 是否已同步到帧头
 
   while (!quit_) {
-    if (error_count > 5000) {
+    if (error_count > 50) {
       error_count = 0;
       tools::logger()->warn("[Gimbal] Too many errors, attempting to reconnect...");
+      frame_synced = false;
       reconnect();
       continue;
     }
 
-    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) {
-      error_count++;
-      continue;
+    // 帧同步：逐字节读，直到找到 'SP' 帧头
+    if (!frame_synced) {
+      uint8_t byte1 = 0;
+      // 循环读直到找到 'S' (0x53)
+      while (!quit_) {
+        if (!read(&byte1, 1)) {
+          error_count++;
+          break;
+        }
+        if (byte1 == 'S') {
+          // 找到可能的帧头第一个字节，读第二个字节
+          uint8_t byte2 = 0;
+          if (read(&byte2, 1)) {
+            if (byte2 == 'P') {
+              // 找到完整的 'SP' 帧头
+              rx_data_.head[0] = 'S';
+              rx_data_.head[1] = 'P';
+              frame_synced = true;
+              break;
+            } else {
+              // 不是 'P'，继续找下一个 'S'
+              byte1 = byte2;  // 检查这个字节是否是 'S'
+              if (byte1 != 'S') {
+                continue;  // 继续读下一个字节
+              }
+            }
+          } else {
+            error_count++;
+            break;
+          }
+        }
+      }
+      
+      if (!frame_synced) {
+        error_count++;
+        continue;
+      }
     }
-
-    if (rx_data_.head[0] != 'S' || rx_data_.head[1] != 'P') continue;
 
     auto t = std::chrono::steady_clock::now();
 
+    // 帧已同步，读剩余的数据（41 字节）
     if (!read(
           reinterpret_cast<uint8_t *>(&rx_data_) + sizeof(rx_data_.head),
           sizeof(rx_data_) - sizeof(rx_data_.head))) {
       error_count++;
+      frame_synced = false;
       continue;
     }
 
-    if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
-      tools::logger()->debug("[Gimbal] CRC16 check failed.");
+    // 检查 CRC
+    // MCU 发送的是小端（低字节在前，高字节在后）
+    uint16_t recv_crc = rx_data_.crc16;
+    uint16_t calc_crc = tools::get_crc16(
+      reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_) - sizeof(rx_data_.crc16));
+
+    if (recv_crc != calc_crc) {
+      error_count++;
+      frame_synced = false;
       continue;
     }
 
     error_count = 0;
+    frame_synced = false;  // 重置帧同步标志，为下一帧做准备
     Eigen::Quaterniond q(rx_data_.q[0], rx_data_.q[1], rx_data_.q[2], rx_data_.q[3]);
     queue_.push({q, t});
 
