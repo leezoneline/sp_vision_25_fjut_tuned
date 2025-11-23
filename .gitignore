@@ -10,6 +10,8 @@ records_new/
 imgs/
 MvSdkLog/
 testvideos/
-watchdog.sh
+watchdog.pid
+kernel.errors.txt
+neo/
 records_24/
 records_25/
