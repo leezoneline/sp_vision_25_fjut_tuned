@@ -67,6 +67,12 @@ int main(int argc, char * argv[])
   std::atomic<io::GimbalMode> mode{io::GimbalMode::IDLE};
   auto last_mode{io::GimbalMode::IDLE};
 
+  // 用于保存发送的命令
+  struct SendCommand {
+    float yaw = 0;
+    float pitch = 0;
+  } send_cmd;
+
   auto plan_thread = std::thread([&]() {
     auto t0 = std::chrono::steady_clock::now();
     uint16_t last_bullet_count = 0;
@@ -76,6 +82,9 @@ int main(int argc, char * argv[])
         auto target = target_queue.front();
         auto gs = gimbal.state();
         auto plan = planner.plan(target, gs.bullet_speed);
+
+        send_cmd.yaw = plan.yaw;
+        send_cmd.pitch = plan.pitch;
 
         gimbal.send(
           plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel,
@@ -100,6 +109,14 @@ int main(int argc, char * argv[])
     auto gs = gimbal.state();
     recorder.record(img, q, t);
     solver.set_R_gimbal2world(q);
+
+    // 发送数据到 PlotJuggler
+    nlohmann::json plot_data;
+    plot_data["gimbal/yaw_recv"] = gs.yaw;
+    plot_data["gimbal/pitch_recv"] = gs.pitch;
+    plot_data["gimbal/yaw_send"] = send_cmd.yaw;
+    plot_data["gimbal/pitch_send"] = send_cmd.pitch;
+    plotter.plot(plot_data);
 
     /// 自瞄
     if (mode.load() == io::GimbalMode::AUTO_AIM) {
@@ -129,12 +146,17 @@ int main(int argc, char * argv[])
         auto target_copy = buff_big_target;
         buff_plan = buff_aimer.mpc_aim(target_copy, t, gs, true);
       }
+      send_cmd.yaw = buff_plan.yaw;
+      send_cmd.pitch = buff_plan.pitch;
       gimbal.send(
         buff_plan.control, buff_plan.fire, buff_plan.yaw, buff_plan.yaw_vel, buff_plan.yaw_acc,
         buff_plan.pitch, buff_plan.pitch_vel, buff_plan.pitch_acc);
 
-    } else
+    } else {
+      send_cmd.yaw = 0;
+      send_cmd.pitch = 0;
       gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
+    }
   }
 
   quit = true;
