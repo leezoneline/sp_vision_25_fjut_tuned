@@ -37,13 +37,13 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: 2 # degree -2.5
-pitch_offset: 6.5 # degree 2
-comming_angle: 55 # degree
+yaw_offset: -1 # degree -2.5
+pitch_offset: -1.4 # degree 2
+comming_angle: 60 # degree
 leaving_angle: 20 # degree
-decision_speed: 7 # rad/s
-high_speed_delay_time: 0.0 # s
-low_speed_delay_time: 0.0 # s planner use this value
+decision_speed: 8 # rad/s
+high_speed_delay_time: 0.030 # s
+low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
@@ -51,25 +51,25 @@ second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
-camera_name: "daheng"
+camera_name: "hikrobot"
 exposure_ms: 3
-gain: 15.0
-vid_pid: "2ba2:4d55"  
+gain: 10.0
+vid_pid: "2bdf:0001"
 
 #  1  0  0
 #  0  1  0
 #  0  0  1
-R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+R_gimbal2imubody: [1, 0, 0, 0, 0, 1, 0, 1, 0]
 
-# 重投影误差: 0.1820px
-camera_matrix: [1785.4881526822305, 0, 672.4806478241826, 0, 1785.026019470562, 559.89603224794314, 0, 0, 1]
-distort_coeffs: [-0.076005079619881746, 0.11182817466388446, 0.0005362204787722057, -0.0027546300984895122, 0]
+# 重投影误差: 0.0867px
+camera_matrix: [1779.800570778375, 0, 699.9109078038158, 0, 1781.3047749110701, 520.39241684723549, 0, 0, 1]
+distort_coeffs: [-0.21139489573123771, 0.16401622887431042, -0.0011870788389302274, -4.5796284652329295e-05, 0]
 
-# 相机同理想情况的偏角: yaw1.44 pitch-7.28 roll0.96 degree
-# 标定板到世界坐标系原点的水平距离: 1.13 m
-# 标定板同竖直摆放时的偏角: yaw7.61 pitch13.92 roll-0.46 degree
-R_camera2gimbal: [-0.027182119030230909, -0.12616154330853446, 0.99163723074269183, -0.99949106557517331, 0.019998323121329122, -0.024853106601381177, -0.016695575474690555, -0.99180811252093692, -0.12664093215554434]
-t_camera2gimbal: [0.13160669975045827, 0.10377721766577375, 0.024908271912914642]
+# 相机同理想情况的偏角: yaw-161.21 pitch69.16 roll-72.39 degree
+# 标定板到世界坐标系原点的水平距离: 0.52 m
+# 标定板同竖直摆放时的偏角: yaw49.79 pitch64.08 roll136.82 degree
+R_camera2gimbal: [0.9407542559576777, 0.039488610285080841, -0.33678194659938171, -0.00064691778647612457, 0.99340317719227644, 0.11467218076616324, 0.33908850082964093, -0.1076604718642971, 0.93457381270987006]
+t_camera2gimbal: [-0.044244503258666253, -0.054091374365172126, 0.12978351893874365]
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x100

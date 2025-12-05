@@ -3,12 +3,12 @@
 # gamma: 0.5
 # vid_pid: "f622:d13a"
 
-# camera_name: "hikrobot"
-# exposure_ms: 3
-# gain: 10.0
-# vid_pid: "2bdf:0001"
-
-camera_name: "daheng"
+camera_name: "hikrobot"
 exposure_ms: 3
-gain: 15.0
-vid_pid: "2ba2:4d55"   # 用 lsusb 查看你的相机 VID:PID
+gain: 10.0
+vid_pid: "2bdf:0001"
+
+# camera_name: "daheng"
+# exposure_ms: 3
+# gain: 15.0
+# vid_pid: "2ba2:4d55"  
