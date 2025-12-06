@@ -5,7 +5,7 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXECUTABLE="${PROJECT_DIR}/build/standard_mpc"
+EXECUTABLE="${PROJECT_DIR}/build/auto_aim_debug_mpc"
 LOG_FILE="${PROJECT_DIR}/logs/watchdog.log"
 PID_FILE="${PROJECT_DIR}/watchdog.pid"
 

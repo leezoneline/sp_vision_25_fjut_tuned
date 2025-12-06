@@ -102,13 +102,22 @@ IMU型号：使用C板内置BMI088作为IMU\
         ```
         [Desktop Entry]
         Type=Application
-        Exec=/home/rm/Desktop/sp_vision_25/autostart.sh
+        Exec=home/rmnuc/Desktop/sp_vision_25_fjut_tuned/autostart.sh
         Name=sp_vision
         ```
         注: [Exec](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)必须为绝对路径.
     4. 确保`autostart.sh`有可执行权限:
         ```
         chmod +x autostart.sh
+        ```
+    5. 如果要停止watchdog进程:
+        ```
+        screen -ls          # 先看会话名
+        screen -S <会话名> -X quit
+        ```
+        或
+        ```
+        pkill -f watchdog.sh
         ```
 
 5. USB2CAN设置（可选）
