@@ -102,42 +102,51 @@ std::list<Armor> YOLO11::detect(const cv::Mat & raw_img, int frame_count)
 std::list<Armor> YOLO11::parse(
   double scale, cv::Mat & output, const cv::Mat & bgr_img, int frame_count)
 {  // for each row: xywh + classess
-  cv::transpose(output, output);
+  // 直接访问输出，避免转置开销
+  const int num_detections = output.cols;
+  const int num_features = output.rows;
 
   std::vector<int> ids;
   std::vector<float> confidences;
   std::vector<cv::Rect> boxes;
   std::vector<std::vector<cv::Point2f>> armors_key_points;
-  for (int r = 0; r < output.rows; r++) {
-    auto xywh = output.row(r).colRange(0, 4);
-    auto scores = output.row(r).colRange(4, 4 + class_num_);
-    auto one_key_points = output.row(r).colRange(4 + class_num_, 50);
-
-    std::vector<cv::Point2f> armor_key_points;
-
-    double score;
-    cv::Point max_point;
-    cv::minMaxLoc(scores, nullptr, &score, nullptr, &max_point);
-
-    if (score < score_threshold_) continue;
-
-    auto x = xywh.at<float>(0);
-    auto y = xywh.at<float>(1);
-    auto w = xywh.at<float>(2);
-    auto h = xywh.at<float>(3);
-    auto left = static_cast<int>((x - 0.5 * w) / scale);
-    auto top = static_cast<int>((y - 0.5 * h) / scale);
-    auto width = static_cast<int>(w / scale);
-    auto height = static_cast<int>(h / scale);
-
-    for (int i = 0; i < 4; i++) {
-      float x = one_key_points.at<float>(0, i * 2 + 0) / scale;
-      float y = one_key_points.at<float>(0, i * 2 + 1) / scale;
-      cv::Point2f kp = {x, y};
-      armor_key_points.push_back(kp);
+  
+  for (int c = 0; c < num_detections; c++) {
+    // 直接通过列索引访问，无需转置
+    float x = output.at<float>(0, c);
+    float y = output.at<float>(1, c);
+    float w = output.at<float>(2, c);
+    float h = output.at<float>(3, c);
+    
+    // 找出最大分数的类别
+    double max_score = -1;
+    int max_class_id = 0;
+    for (int i = 0; i < class_num_; i++) {
+      float class_score = output.at<float>(4 + i, c);
+      if (class_score > max_score) {
+        max_score = class_score;
+        max_class_id = i;
+      }
     }
-    ids.emplace_back(max_point.x);
-    confidences.emplace_back(score);
+
+    if (max_score < score_threshold_) continue;
+
+    // 提取关键点（直接按固定顺序，无需排序）
+    std::vector<cv::Point2f> armor_key_points;
+    for (int i = 0; i < 4; i++) {
+      float kp_x = output.at<float>(4 + class_num_ + i * 2 + 0, c) / scale;
+      float kp_y = output.at<float>(4 + class_num_ + i * 2 + 1, c) / scale;
+      armor_key_points.emplace_back(kp_x, kp_y);
+    }
+    
+    // 计算边界框
+    int left = static_cast<int>((x - 0.5 * w) / scale);
+    int top = static_cast<int>((y - 0.5 * h) / scale);
+    int width = static_cast<int>(w / scale);
+    int height = static_cast<int>(h / scale);
+
+    ids.emplace_back(max_class_id);
+    confidences.emplace_back(max_score);
     boxes.emplace_back(left, top, width, height);
     armors_key_points.emplace_back(armor_key_points);
   }
@@ -147,7 +156,7 @@ std::list<Armor> YOLO11::parse(
 
   std::list<Armor> armors;
   for (const auto & i : indices) {
-    sort_keypoints(armors_key_points[i]);
+    // 直接使用关键点，无需排序
     if (use_roi_) {
       armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i], offset_);
     } else {

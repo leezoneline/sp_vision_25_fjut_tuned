@@ -35,7 +35,7 @@ private:
 
   const int class_num_ = 2;
   const float nms_threshold_ = 0.3;
-  const float score_threshold_ = 0.7;
+  const float score_threshold_ = 0.5;
   double min_confidence_, binary_threshold_;
 
   ov::Core core_;
@@ -50,6 +50,7 @@ private:
   cv::Mat get_pattern(const cv::Mat & bgr_img, const Armor & armor) const;
   ArmorType get_type(const Armor & armor);
   cv::Point2f get_center_norm(const cv::Mat & bgr_img, const cv::Point2f & center) const;
+  void classify_color(Armor & armor) const;
 
   std::list<Armor> parse(double scale, cv::Mat & output, const cv::Mat & bgr_img, int frame_count);
 
