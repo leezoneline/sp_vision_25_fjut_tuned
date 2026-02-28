@@ -17,6 +17,7 @@
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 #include "tools/plotter.hpp"
+#include "tools/recorder.hpp"
 #include "tools/thread_safe_queue.hpp"
 
 using namespace std::chrono_literals;
@@ -28,6 +29,7 @@ const std::string keys =
 int main(int argc, char * argv[])
 {
   tools::Exiter exiter;
+  tools::Recorder recorder;
   tools::Plotter plotter;
 
   cv::CommandLineParser cli(argc, argv, keys);
@@ -88,8 +90,13 @@ int main(int argc, char * argv[])
       data["fired"] = fired ? 1 : 0;
 
       if (target.has_value()) {
+        data["target_x"] = target->ekf_x()[0];   //x
+        data["target_vx"] = target->ekf_x()[1];  //vx
+        data["target_y"] = target->ekf_x()[2];   //y
+        data["target_vy"] = target->ekf_x()[3];  //vy
         data["target_z"] = target->ekf_x()[4];   //z
         data["target_vz"] = target->ekf_x()[5];  //vz
+        data["armor_angle"] = target->ekf_x()[6];  //angle
       }
 
       if (target.has_value()) {
@@ -110,6 +117,7 @@ int main(int argc, char * argv[])
   while (!exiter.exit()) {
     camera.read(img, t);
     auto q = gimbal.q(t);
+    // recorder.record(img, q, t);
 
     solver.set_R_gimbal2world(q);
     auto armors = yolo.detect(img);
