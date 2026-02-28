@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <deque>
-#include <eigen3/Eigen/Dense>  // 必须在opencv2/core/eigen.hpp上面
+#include <Eigen/Dense>  // 必须在opencv2/core/eigen.hpp上面
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include <optional>
